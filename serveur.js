@@ -1,0 +1,38 @@
+const express = require('express')
+const cors = require('cors')
+const app = express()
+const port = 4000
+
+// Traite des requete dons le "content-type" est "application/x-www-form-urlencoded"
+app.use(express.urlencoded({ extended: true }))
+
+// Traite des requete dons le "content-type" est "application/json"
+app.use(express.json())
+
+// Accepte les requetes provenant d'origine differente
+app.use(cors())
+
+app.get('/', (requete, resultat) => resultat.send('Le serveur marche !'))
+
+require('./routes/meme.routes.js')(app)
+
+app.listen(port, () => {
+  console.log(`Le serveur est accessible sur le port : ${port}`)
+})
+
+const mongoose = require('mongoose')
+
+mongoose.Promise = global.Promise
+
+// Connecting to the database
+mongoose
+  .connect('mongodb://localhost:27017/generator_meme', {
+    useNewUrlParser: true,
+  })
+  .then(() => {
+    console.log('Successfully connected to the database')
+  })
+  .catch((err) => {
+    console.log('Could not connect to the database. Exiting now...', err)
+    process.exit()
+  })
