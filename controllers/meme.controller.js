@@ -1,16 +1,30 @@
 const Meme = require('../models/meme.model.js')
 
-exports.create = (requete, resultat) => {
-  const meme = new Meme({
-    nom: requete.body.nom,
-    description: requete.body.description,
-    image_url: requete.body.image_url,
-  })
+const multer = require('multer')
+const { uploadConfig } = require('../configuration.js')
 
-  meme
-    .save()
-    .then((donnees) => resultat.status(201).send(donnees))
-    .catch((erreur) => resultat.status(500).send({ message: erreur.message }))
+const upload = uploadConfig.any()
+
+exports.create = (requete, resultat) => {
+  upload(requete, resultat, (erreur) => {
+    if (erreur instanceof multer.MulterError) {
+      resultat.status(400).send({ message: 'image trop lourde' })
+      return
+    }
+
+    const json = JSON.parse(requete.body.meme)
+
+    const meme = new Meme({
+      nom: json.nom,
+      description: json.description,
+      image_url: requete.files[0].filename,
+    })
+
+    meme
+      .save()
+      .then((donnees) => resultat.status(201).send(donnees))
+      .catch((erreur) => resultat.status(500).send({ message: erreur.message }))
+  })
 }
 
 exports.findAll = (requete, resultat) => {

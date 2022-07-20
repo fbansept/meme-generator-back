@@ -3,7 +3,7 @@ module.exports = (app) => {
 
   app.post('/meme', memeController.create)
 
-  app.get('/memes',memeController.findAll)
+  app.get('/memes', memeController.findAll)
 
   app.delete('/meme/:nom', memeController.deleteByNom)
 }
