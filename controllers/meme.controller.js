@@ -7,23 +7,32 @@ const upload = uploadConfig.any()
 
 exports.create = (requete, resultat) => {
   upload(requete, resultat, (erreur) => {
-    if (erreur instanceof multer.MulterError) {
-      resultat.status(400).send({ message: 'image trop lourde' })
-      return
+    try {
+      if (erreur instanceof multer.MulterError) {
+        resultat.status(400).send({ message: 'image trop lourde' })
+        return
+      } else if (!requete.files[0]) {
+        resultat.status(400).send({ message: "l'image est obligatoire" })
+        return
+      }
+
+      const json = JSON.parse(requete.body.meme)
+
+      const meme = new Meme({
+        nom: json.nom,
+        description: json.description,
+        image_url: requete.files[0].filename,
+      })
+
+      meme
+        .save()
+        .then((donnees) => resultat.status(201).send(donnees))
+        .catch((erreur) =>
+          resultat.status(500).send({ message: erreur.message }),
+        )
+    } catch {
+      resultat.status(500).send({ message: 'erreur du serveur' })
     }
-
-    const json = JSON.parse(requete.body.meme)
-
-    const meme = new Meme({
-      nom: json.nom,
-      description: json.description,
-      image_url: requete.files[0].filename,
-    })
-
-    meme
-      .save()
-      .then((donnees) => resultat.status(201).send(donnees))
-      .catch((erreur) => resultat.status(500).send({ message: erreur.message }))
   })
 }
 
