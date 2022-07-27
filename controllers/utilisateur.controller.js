@@ -8,15 +8,17 @@ const upload = uploadConfig.any()
 exports.create = (requete, resultat) => {
   upload(requete, resultat, (erreur) => {
     try {
-      if (erreur instanceof multer.MulterError) {
-        resultat.status(400).send({ message: 'image trop lourde' })
-        return
-      } else if (!requete.files[0]) {
-        resultat.status(400).send({ message: "l'image est obligatoire" })
-        return
-      }
+      // if (erreur instanceof multer.MulterError) {
+      //   resultat.status(400).send({ message: 'image trop lourde' })
+      //   return
+      // } else if (!requete.files[0]) {
+      //   resultat.status(400).send({ message: "l'image est obligatoire" })
+      //   return
+      // }
 
-      const json = JSON.parse(requete.body.utilisateur)
+      //const json = JSON.parse(requete.body.utilisateur)
+
+      const json = requete.body
 
       const bcrypt = require('bcrypt')
 
@@ -26,7 +28,7 @@ exports.create = (requete, resultat) => {
       const utilisateur = new Utilisateur({
         email: json.email,
         password: hash,
-        avatar_url: requete.files[0].filename,
+        //avatar_url: requete.files[0].filename,
       })
 
       utilisateur
@@ -35,7 +37,8 @@ exports.create = (requete, resultat) => {
         .catch((erreur) =>
           resultat.status(500).send({ message: erreur.message }),
         )
-    } catch {
+    } catch (e) {
+      console.log(e)
       resultat.status(500).send({ message: 'erreur du serveur' })
     }
   })
@@ -53,16 +56,13 @@ exports.findByEmail = (requete, resultat) => {
     .catch((erreur) => resultat.status(500).send({ message: erreur.message }))
 }
 
-
 exports.deleteByEmail = (requete, resultat) => {
   Utilisateur.findOneAndRemove({ email: requete.params.email }).then(
     (utilisateur) => {
       if (!utilisateur) {
-        return resultat
-          .status(404)
-          .send({
-            message: "l'email : " + requete.params.email + " n'existe pas",
-          })
+        return resultat.status(404).send({
+          message: "l'email : " + requete.params.email + " n'existe pas",
+        })
       }
       return resultat.send({ message: "l'utilisateur est bien supprimé" })
     },

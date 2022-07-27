@@ -18,6 +18,7 @@ app.use(cors())
 app.get('/', (requete, resultat) => resultat.send('Le serveur marche !'))
 
 require('./routes/meme.routes.js')(app)
+require('./routes/utilisateur.routes.js')(app)
 
 app.listen(port, () => {
   console.log(`Le serveur est accessible sur le port : ${port}`)
